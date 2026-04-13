@@ -37,6 +37,7 @@ class WorkoutBatchCreate(BaseModel):
 
 class WorkoutSetResponse(BaseModel):
     id: int
+    user_id: Optional[int] = None
     date: date
     category: str
     exercise_name: str

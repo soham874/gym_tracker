@@ -28,8 +28,11 @@ class WorkoutRepository:
         date_to: Optional[date] = None,
         category: Optional[str] = None,
         exercise: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> list[WorkoutSet]:
         query = self.db.query(WorkoutSet)
+        if user_id:
+            query = query.filter(WorkoutSet.user_id == user_id)
         if date_from:
             query = query.filter(WorkoutSet.date >= date_from)
         if date_to:
@@ -46,6 +49,7 @@ class WorkoutRepository:
         date_to: Optional[date] = None,
         category: Optional[str] = None,
         exercise: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> list[dict]:
         query = self.db.query(
             WorkoutSet.date,
@@ -58,6 +62,8 @@ class WorkoutRepository:
                 "total_volume_kg"
             ),
         )
+        if user_id:
+            query = query.filter(WorkoutSet.user_id == user_id)
         if date_from:
             query = query.filter(WorkoutSet.date >= date_from)
         if date_to:
@@ -86,17 +92,21 @@ class WorkoutRepository:
             for r in rows
         ]
 
-    def get_distinct_exercises(self) -> list[dict]:
-        rows = (
+    def get_distinct_exercises(self, user_id: Optional[int] = None) -> list[dict]:
+        query = (
             self.db.query(WorkoutSet.category, WorkoutSet.exercise_name)
             .distinct()
-            .order_by(WorkoutSet.category, WorkoutSet.exercise_name)
-            .all()
         )
+        if user_id:
+            query = query.filter(WorkoutSet.user_id == user_id)
+        rows = query.order_by(WorkoutSet.category, WorkoutSet.exercise_name).all()
         return [{"category": r.category, "exercise_name": r.exercise_name} for r in rows]
 
-    def delete(self, workout_id: int) -> bool:
-        workout = self.db.query(WorkoutSet).filter(WorkoutSet.id == workout_id).first()
+    def delete(self, workout_id: int, user_id: Optional[int] = None) -> bool:
+        query = self.db.query(WorkoutSet).filter(WorkoutSet.id == workout_id)
+        if user_id:
+            query = query.filter(WorkoutSet.user_id == user_id)
+        workout = query.first()
         if not workout:
             return False
         self.db.delete(workout)

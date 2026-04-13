@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const links = [
   { to: '/', label: 'Home' },
@@ -10,6 +11,13 @@ const links = [
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
   return (
     <nav className="bg-indigo-600 shadow-lg">
@@ -20,7 +28,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden sm:flex gap-1">
+          <div className="hidden sm:flex items-center gap-1">
             {links.map((l) => (
               <Link
                 key={l.to}
@@ -34,6 +42,23 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
+
+            {user && (
+              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-indigo-500">
+                {user.picture && (
+                  <img src={user.picture} alt="" className="w-7 h-7 rounded-full" referrerPolicy="no-referrer" />
+                )}
+                <span className="text-indigo-100 text-sm font-medium hidden lg:inline">
+                  {user.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="px-2 py-1 rounded text-xs font-medium text-indigo-200 hover:text-white hover:bg-indigo-500 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -70,6 +95,20 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
+          {user && (
+            <div className="flex items-center gap-2 px-3 py-2 border-t border-indigo-500 mt-2 pt-3">
+              {user.picture && (
+                <img src={user.picture} alt="" className="w-7 h-7 rounded-full" referrerPolicy="no-referrer" />
+              )}
+              <span className="text-indigo-100 text-sm font-medium flex-1">{user.name}</span>
+              <button
+                onClick={handleLogout}
+                className="text-xs font-medium text-indigo-200 hover:text-white"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       )}
     </nav>
