@@ -33,5 +33,5 @@ npm install --silent --prefix frontend
 echo "==> Building frontend..."
 npm run build --prefix frontend
 
-echo "==> Starting server on http://localhost:8000"
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+echo "==> Starting server on http://localhost:8081"
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8081

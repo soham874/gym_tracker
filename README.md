@@ -34,7 +34,7 @@ python3 -m venv .venv
 
 ### Production mode
 
-Builds the frontend and serves everything from FastAPI on port 8000:
+Builds the frontend and serves everything from FastAPI on port 8081:
 
 ```bash
 ./start.sh
@@ -42,13 +42,13 @@ Builds the frontend and serves everything from FastAPI on port 8000:
 
 ### Development mode
 
-Runs backend (port 8000, hot-reload) and Vite dev server (port 5173, HMR) in parallel:
+Runs backend (port 8081, hot-reload) and Vite dev server (port 5174, HMR) in parallel:
 
 ```bash
 ./start-dev.sh
 ```
 
-Open http://localhost:5173 for development (proxies API calls to backend).
+Open http://localhost:5174 for development (proxies API calls to backend).
 
 ## Project Structure
 

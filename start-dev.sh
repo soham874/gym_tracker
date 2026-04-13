@@ -27,17 +27,17 @@ print(f'Database \"{db_name}\" ready.')
 echo "==> Running database migrations..."
 python backend/migrate.py
 
-echo "==> Starting backend (port 8000)..."
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload &
+echo "==> Starting backend (port 8081)..."
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8081 --reload &
 BACKEND_PID=$!
 
 echo "==> Installing frontend dependencies..."
 npm install --silent --prefix frontend
 
-echo "==> Starting frontend dev server (port 5173)..."
+echo "==> Starting frontend dev server (port 5174)..."
 npm run dev --prefix frontend &
 FRONTEND_PID=$!
 
 trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null" EXIT
-echo "==> Backend: http://localhost:8000  |  Frontend: http://localhost:5173"
+echo "==> Backend: http://localhost:8081  |  Frontend: http://localhost:5174"
 wait
