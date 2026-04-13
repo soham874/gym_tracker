@@ -14,38 +14,32 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const COLORS = [
   '#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6',
-  '#ec4899', '#14b8a6', '#f97316',
+  '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
 ]
 
-export default function VolumeChart({ data, displayUnit }) {
-  if (!data || data.length === 0) {
+export default function VolumeChart({ entries, displayUnit }) {
+  if (!entries || entries.length === 0) {
     return <p className="text-sm text-gray-400 text-center py-8">No data to display</p>
   }
 
   const exerciseMap = {}
-  data.forEach((d) => {
-    if (!exerciseMap[d.exercise_name]) exerciseMap[d.exercise_name] = []
-    exerciseMap[d.exercise_name].push({
-      date: d.date,
-      volume: convertWeight(d.total_volume_kg, displayUnit),
-    })
+  entries.forEach((e) => {
+    if (!exerciseMap[e.exercise_name]) exerciseMap[e.exercise_name] = {}
+    const vol = convertWeight(e.sets * e.reps * e.weight_kg, displayUnit)
+    exerciseMap[e.exercise_name][e.date] = (exerciseMap[e.exercise_name][e.date] || 0) + vol
   })
 
-  const allDates = [...new Set(data.map((d) => d.date))].sort()
-  const exercises = Object.keys(exerciseMap)
+  const allDates = [...new Set(entries.map((e) => e.date))].sort()
+  const exerciseNames = Object.keys(exerciseMap)
 
-  const datasets = exercises.map((name, i) => {
-    const lookup = Object.fromEntries(
-      exerciseMap[name].map((p) => [p.date, p.volume])
-    )
-    return {
-      label: name,
-      data: allDates.map((d) => lookup[d] ?? 0),
-      backgroundColor: COLORS[i % COLORS.length] + 'cc',
-      borderColor: COLORS[i % COLORS.length],
-      borderWidth: 1,
-    }
-  })
+  const datasets = exerciseNames.map((name, i) => ({
+    label: name,
+    data: allDates.map((d) => +(exerciseMap[name][d] || 0).toFixed(1)),
+    backgroundColor: COLORS[i % COLORS.length] + 'cc',
+    borderColor: COLORS[i % COLORS.length],
+    borderWidth: 1,
+    borderRadius: 4,
+  }))
 
   return (
     <Bar
@@ -54,12 +48,12 @@ export default function VolumeChart({ data, displayUnit }) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' },
-          title: { display: true, text: `Volume (sets x reps x weight) in ${displayUnit}` },
+          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } },
+          title: { display: true, text: `Volume (sets × reps × weight) in ${displayUnit}` },
         },
         scales: {
           x: { stacked: true },
-          y: { stacked: true, title: { display: true, text: displayUnit } },
+          y: { stacked: true, title: { display: true, text: displayUnit }, beginAtZero: true },
         },
       }}
     />
