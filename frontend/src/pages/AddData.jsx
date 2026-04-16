@@ -14,11 +14,32 @@ export default function AddData() {
   const [entries, setEntries] = useState([emptySet()])
   const [notes, setNotes] = useState('')
   const [status, setStatus] = useState(null)
+  const [previousSets, setPreviousSets] = useState([])
 
   useEffect(() => {
     axios.get('/api/workouts/categories').then((r) => setCategories(r.data))
     axios.get('/api/workouts/exercises').then((r) => setExercises(r.data))
   }, [])
+
+  useEffect(() => {
+    if (!exerciseName.trim()) {
+      setPreviousSets([])
+      return
+    }
+    const timer = setTimeout(() => {
+      axios
+        .get('/api/workouts', { params: { exercise: exerciseName } })
+        .then((r) => {
+          if (r.data.length === 0) {
+            setPreviousSets([])
+            return
+          }
+          setPreviousSets(r.data.slice(0, 10))
+        })
+        .catch(() => setPreviousSets([]))
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [exerciseName])
 
   useEffect(() => {
     if (category) {
@@ -251,6 +272,39 @@ export default function AddData() {
           Save Workout ({entries.length} set{entries.length > 1 ? 's' : ''})
         </button>
       </form>
+
+      {/* Previous sets */}
+      {previousSets.length > 0 && (
+        <div className="mt-6 rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+            <p className="text-xs font-medium text-gray-500">
+              Previous records — {exerciseName}
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-xs text-gray-500 border-b border-gray-100">
+                <th className="px-3 py-1.5 text-left font-medium">Date</th>
+                <th className="px-3 py-1.5 text-center font-medium">Sets</th>
+                <th className="px-3 py-1.5 text-center font-medium">Reps</th>
+                <th className="px-3 py-1.5 text-center font-medium">Weight</th>
+                <th className="px-3 py-1.5 text-left font-medium">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {previousSets.map((s) => (
+                <tr key={s.id} className="border-b border-gray-50 last:border-0">
+                  <td className="px-3 py-1.5 text-gray-500 text-xs">{s.date}</td>
+                  <td className="px-3 py-1.5 text-center">{s.sets}</td>
+                  <td className="px-3 py-1.5 text-center">{s.reps}</td>
+                  <td className="px-3 py-1.5 text-center">{s.weight_kg} kg</td>
+                  <td className="px-3 py-1.5 text-gray-500 text-xs truncate max-w-[120px]">{s.notes || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
